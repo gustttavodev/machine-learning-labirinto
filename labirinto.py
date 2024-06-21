@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 from matplotlib import colors
 from matplotlib.animation import FuncAnimation
 
-# Definir o ambiente do labirinto
+# Definir um labirinto mais interessante e desafiador
 labirinto = np.array([
     [0, -1, 0, 0, 1],
     [0, -1, 0, -1, 0],
     [0, 0, 0, -1, 0],
-    [-1, -1, 0, 0, 0]
+    [-1, -1, 0, 0, 0],
+    [0, 0, 0, -1, 0]
 ])
 
 # Definir o Q-Learning
@@ -35,7 +36,7 @@ class QLearningAgent:
 # Parâmetros e configuração
 n_actions = 4  # Cima, baixo, esquerda, direita
 state_shape = labirinto.shape
-agent = QLearningAgent(alpha=0.1, gamma=0.9, epsilon=0.1, n_actions=n_actions, state_shape=state_shape)
+agent = QLearningAgent(alpha=0.1, gamma=0.9, epsilon=1.0, n_actions=n_actions, state_shape=state_shape)
 
 # Função para verificar se o estado é terminal (saída do labirinto)
 def is_terminal_state(state):
@@ -69,6 +70,8 @@ labirinto_plot = ax.imshow(labirinto, cmap=cmap, norm=norm)
 def update(frame):
     state = (0, 0)  # Estado inicial
     steps = 0
+    agent.epsilon = max(0.01, agent.epsilon * 0.99)  # Decaimento do epsilon
+    
     while not is_terminal_state(state):
         action = agent.choose_action(state)
         next_state = get_next_state(state, action)
@@ -82,7 +85,7 @@ def update(frame):
         labirinto_copy = labirinto.copy()
         labirinto_copy[state] = 2  # Estado atual do agente
         labirinto_plot.set_array(labirinto_copy)
-        ax.set_title(f'Tentativa: {frame}, Passos: {steps}')
+        ax.set_title(f'Tentativa: {frame}, Passos: {steps}, Epsilon: {agent.epsilon:.2f}')
         return [labirinto_plot]
 
 # Configurar animação
